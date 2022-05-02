@@ -107,6 +107,24 @@ func (om *OrderedMap) Newest() *Pair {
 	return listElementToPair(om.list.Back())
 }
 
+// Range calls f sequentially for each key and value present in the map. If f returns false, Range stops the iteration.
+func (om *OrderedMap) Range(f func(key, value interface{}) bool) {
+	for pair := listElementToPair(om.list.Front()); pair != nil; pair = pair.Next() {
+		if cont := f(pair.Key, pair.Value); !cont {
+			break
+		}
+	}
+}
+
+// RangeReverse works like Range, but in reverse order.
+func (om *OrderedMap) RangeReverse(f func(key, value interface{}) bool) {
+	for pair := listElementToPair(om.list.Back()); pair != nil; pair = pair.Next() {
+		if cont := f(pair.Key, pair.Value); !cont {
+			break
+		}
+	}
+}
+
 // Next returns a pointer to the next pair.
 func (p *Pair) Next() *Pair {
 	return listElementToPair(p.element.Next())
