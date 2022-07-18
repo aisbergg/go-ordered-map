@@ -10,6 +10,7 @@ package orderedmap
 import (
 	"container/list"
 	"fmt"
+	"reflect"
 )
 
 type Pair struct {
@@ -30,6 +31,47 @@ func New() *OrderedMap {
 		pairs: make(map[interface{}]*Pair),
 		list:  list.New(),
 	}
+}
+
+// NewWithHint creates a new OrderedMap with the given size hint.
+func NewWithHint(hint int) *OrderedMap {
+	return &OrderedMap{
+		pairs: make(map[interface{}]*Pair, hint),
+		list:  list.New(),
+	}
+}
+
+// NewWithPairs creates a new OrderedMap and adds the given key-value pairs.
+func NewWithPairs(keyValuePairs ...interface{}) *OrderedMap {
+	if len(keyValuePairs)%2 != 0 {
+		panic("must provide an even number of key-value pairs")
+	}
+	om := &OrderedMap{
+		pairs: make(map[interface{}]*Pair, len(keyValuePairs)/2),
+		list:  list.New(),
+	}
+	for i := 0; i < len(keyValuePairs); i += 2 {
+		key := keyValuePairs[i]
+		value := keyValuePairs[i+1]
+		om.Set(key, value)
+	}
+	return om
+}
+
+// NewWithMap creates a new OrderedMap from the given map.
+func NewWithMap(m interface{}) *OrderedMap {
+	mVal := reflect.ValueOf(m)
+	if mVal.Kind() != reflect.Map {
+		panic("must provide a map")
+	}
+	om := &OrderedMap{
+		pairs: make(map[interface{}]*Pair, mVal.Len()),
+		list:  list.New(),
+	}
+	for _, key := range mVal.MapKeys() {
+		om.Set(key.Interface(), mVal.MapIndex(key).Interface())
+	}
+	return om
 }
 
 // Get looks for the given key, and returns the value associated with it,
