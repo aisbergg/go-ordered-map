@@ -160,7 +160,7 @@ func (om *OrderedMap) Range(f func(key, value interface{}) bool) {
 
 // RangeReverse works like Range, but in reverse order.
 func (om *OrderedMap) RangeReverse(f func(key, value interface{}) bool) {
-	for pair := listElementToPair(om.list.Back()); pair != nil; pair = pair.Next() {
+	for pair := listElementToPair(om.list.Back()); pair != nil; pair = pair.Prev() {
 		if cont := f(pair.Key, pair.Value); !cont {
 			break
 		}
