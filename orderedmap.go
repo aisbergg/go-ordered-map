@@ -8,7 +8,9 @@
 package orderedmap
 
 import (
+	"bytes"
 	"container/list"
+	"encoding/json"
 	"fmt"
 	"reflect"
 )
@@ -172,7 +174,7 @@ func (p *Pair) Next() *Pair {
 	return listElementToPair(p.element.Next())
 }
 
-// Previous returns a pointer to the previous pair.
+// Prev returns a pointer to the previous pair.
 func (p *Pair) Prev() *Pair {
 	return listElementToPair(p.element.Prev())
 }
@@ -250,4 +252,27 @@ func (om *OrderedMap) MoveToFront(key interface{}) error {
 	}
 	om.list.MoveToFront(pair.element)
 	return nil
+}
+
+// MarshalJSON implements the json.Marshaler interface.
+func (om *OrderedMap) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	buf.WriteByte('{')
+	encoder := json.NewEncoder(&buf)
+	i := 0
+	for pair := listElementToPair(om.list.Front()); pair != nil; pair = pair.Next() {
+		if i > 0 {
+			buf.WriteByte(',')
+		}
+		if err := encoder.Encode(pair.Key); err != nil {
+			return nil, err
+		}
+		buf.WriteByte(':')
+		if err := encoder.Encode(pair.Value); err != nil {
+			return nil, err
+		}
+		i++
+	}
+	buf.WriteByte('}')
+	return buf.Bytes(), nil
 }
